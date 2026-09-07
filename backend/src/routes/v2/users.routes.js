@@ -1,34 +1,82 @@
 import { Router } from "express";
+import { User } from "../../models/user.model.js";
 
 export const router = Router();
 
 // Read users
-router.get("/", (req, res, next) => {
+router.get("/", async (req, res, next) => {
   try {
+    const users = await User.find();
+    return res.status(200).json(users);
   } catch (error) {
     next(error);
   }
 });
 
 // Create user
-router.post("/", (req, res, next) => {
+router.post("/", async (req, res, next) => {
   try {
+    const { username, email, password } = req.body;
+
+    if (!username || !email || !password) {
+      return res
+        .status(400)
+        .json({ error: "username, email, password are required!" });
+    }
+
+    const newUser = await User.create({ username, email, password });
+
+    const { password: _password, ...userWithoutPassword } = newUser.toObject();
+
+    return res.status(201).json(userWithoutPassword);
   } catch (error) {
     next(error);
   }
 });
 
 // Update user
-router.put("/:id", (req, res, next) => {
+router.put("/:id", async (req, res, next) => {
   try {
+    const { id } = req.params;
+    const { username, email, password } = req.body;
+
+    if (!username || !email || !password) {
+      return res
+        .status(400)
+        .json({ error: "username, email and password are required!!!" });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      {
+        username,
+        email,
+        password,
+      },
+      { new: true, runValidators: true },
+    ).select("-password");
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: "User not found!" });
+    }
+
+    return res.status(200).json(updatedUser);
   } catch (error) {
     next(error);
   }
 });
 
 // Delete user
-router.delete("/:id", (req, res, next) => {
+router.delete("/:id", async (req, res, next) => {
   try {
+    const { id } = req.params;
+
+    const deletedUser = await User.findByIdAndDelete(id);
+
+    if (!deletedUser) {
+      return res.status(404).json({ error: "User not found!" });
+    }
+    return res.status(200).json({ msg: "User deleted!!!" });
   } catch (error) {
     next(error);
   }
