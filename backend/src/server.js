@@ -1,8 +1,11 @@
 import express from "express";
+import cors from "cors";
 import { router as apiRoutes } from "./routes/index.js";
 import { connectDB } from "./config/db.js";
+import { connectSupabase } from "./config/supabase.js";
 
 const app = express();
+app.use(cors({ origin: "http://localhost:5173" }));
 app.use(express.json());
 
 // CRUD routes and endpoints
@@ -182,6 +185,7 @@ const PORT = 3001;
 async function start() {
   try {
     await connectDB();
+    await connectSupabase();
 
     app.listen(PORT, () => {
       console.log(`Sever running on PORT:${PORT} 🟢`);
