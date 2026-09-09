@@ -34,6 +34,30 @@ router.post("/", async (req, res, next) => {
   }
 });
 
+router.post("/register", async (req, res, next) => {
+  try {
+    const { username, email, password } = req.body;
+
+    if (!username || !email || !password) {
+      return res
+        .status(400)
+        .json({ error: "username, email, password are required!" });
+    }
+
+    const newUser = await User.create({ username, email, password });
+
+    const {
+      password: _password,
+      __v,
+      ...userWithoutPassword
+    } = newUser.toObject();
+
+    return res.status(201).json(userWithoutPassword);
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Update user
 router.put("/:id", async (req, res, next) => {
   try {

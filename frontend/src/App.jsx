@@ -51,7 +51,9 @@ const App = () => {
     e.preventDefault();
     try {
       const isEdit = Boolean(editingUser);
-      const url = isEdit ? `${API_URL}/${editingUser._id}` : API_URL;
+      const url = isEdit
+        ? `${API_URL}/${editingUser._id}`
+        : `${API_URL}/register`;
       const method = isEdit ? "PUT" : "POST";
 
       const res = await fetch(url, {
