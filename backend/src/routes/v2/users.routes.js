@@ -2,6 +2,7 @@ import { Router } from "express";
 import { User } from "../../models/user.model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { authUser } from "../../middlewares/authUser.js";
 
 export const router = Router();
 
@@ -157,6 +158,44 @@ router.post("/login", async (req, res, next) => {
         username: user.username,
         role: user.role,
         email: user.email,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/logout", (req, res, next) => {
+  const isProd = process.env.NODE_ENV === "production";
+
+  res.clearCookie("accessToken", {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
+    path: "/",
+  });
+
+  return res.status(200).json({ success: true, message: "Logout successful!" });
+});
+
+// Check user's token
+router.get("/auth", authUser, async (req, res, next) => {
+  try {
+    const userId = req.user.user._id;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ success: false, message: "User not found!!!" });
+    }
+    return res.status(200).json({
+      success: true,
+      data: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
       },
     });
   } catch (error) {

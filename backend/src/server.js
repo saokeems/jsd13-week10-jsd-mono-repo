@@ -3,10 +3,12 @@ import cors from "cors";
 import { router as apiRoutes } from "./routes/index.js";
 import { connectDB } from "./config/db.js";
 import { connectSupabase } from "./config/supabase.js";
+import cookieParser from "cookie-parser";
 
 const app = express();
 app.use(cors({ origin: "http://localhost:5173" }));
 app.use(express.json());
+app.use(cookieParser());
 
 // CRUD routes and endpoints
 
